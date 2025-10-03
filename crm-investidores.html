@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Investidores</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <div class="fixed left-0 top-0 h-full w-64 bg-gray-900 text-white">
+        <div class="p-6">
+            <h1 class="text-2xl font-bold">CRM Investidores</h1>
+        </div>
+        <nav class="mt-6">
+            <a href="#" data-page="dashboard" class="nav-link flex items-center px-6 py-3 hover:bg-gray-800 transition active">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i>
+                Dashboard
+            </a>
+            <a href="#" data-page="instituicoes" class="nav-link flex items-center px-6 py-3 hover:bg-gray-800 transition">
+                <i data-lucide="building-2" class="w-5 h-5 mr-3"></i>
+                Instituições
+            </a>
+            <a href="#" data-page="contatos" class="nav-link flex items-center px-6 py-3 hover:bg-gray-800 transition">
+                <i data-lucide="users" class="w-5 h-5 mr-3"></i>
+                Contatos
+            </a>
+            <a href="#" data-page="interacoes" class="nav-link flex items-center px-6 py-3 hover:bg-gray-800 transition">
+                <i data-lucide="message-square" class="w-5 h-5 mr-3"></i>
+                Interações
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-content">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Dashboard</h2>
+                <p class="text-gray-600 mt-1">Visão geral das suas tarefas e interações</p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Instituições</p>
+                            <p class="text-3xl font-bold text-gray-900" id="total-instituicoes">0</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <i data-lucide="building-2" class="w-6 h-6 text-blue-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Tarefas Pendentes</p>
+                            <p class="text-3xl font-bold text-gray-900" id="total-tarefas">0</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <i data-lucide="clock" class="w-6 h-6 text-yellow-600"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm">Atrasadas</p>
+                            <p class="text-3xl font-bold text-red-600" id="total-atrasadas">0</p>
+                        </div>
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Tarefas de Hoje</h3>
+                    </div>
+                    <div class="p-6" id="tarefas-hoje">
+                        <p class="text-gray-500 text-center py-8">Nenhuma tarefa para hoje</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow">
+                    <div class="p-6 border-b">
+                        <h3 class="text-lg font-semibold text-gray-900">Próximas Interações</h3>
+                    </div>
+                    <div class="p-6" id="proximas-interacoes">
+                        <p class="text-gray-500 text-center py-8">Nenhuma interação agendada</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instituições Page -->
+        <div id="instituicoes-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Instituições</h2>
+                    <p class="text-gray-600 mt-1">Gerencie instituições e perfis de investimento</p>
+                </div>
+                <button onclick="showInstituicaoForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                    Nova Instituição
+                </button>
+            </div>
+
+            <!-- Filtros -->
+            <div class="bg-white rounded-lg shadow p-6 mb-6">
+                <div class="grid grid-cols-4 gap-4">
+                    <input type="text" id="filter-nome" placeholder="Buscar por nome..." class="border rounded-lg px-4 py-2">
+                    <select id="filter-tipo" class="border rounded-lg px-4 py-2">
+                        <option value="">Todos os tipos</option>
+                        <option value="gestora">Gestora</option>
+                        <option value="seguradora">Seguradora</option>
+                        <option value="tesouraria">Tesouraria</option>
+                        <option value="fo">Family Office</option>
+                    </select>
+                    <select id="filter-produto" class="border rounded-lg px-4 py-2">
+                        <option value="">Todos os produtos</option>
+                        <option value="Debênture">Debênture</option>
+                        <option value="CRA">CRA</option>
+                        <option value="CRI">CRI</option>
+                        <option value="Nota Comercial">Nota Comercial</option>
+                        <option value="FIDC">FIDC</option>
+                        <option value="CPR">CPR</option>
+                        <option value="LF">LF</option>
+                    </select>
+                    <button onclick="applyFilters()" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300">
+                        Filtrar
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow" id="instituicoes-list">
+                <p class="text-gray-500 text-center py-8">Nenhuma instituição cadastrada</p>
+            </div>
+        </div>
+
+        <!-- Contatos Page -->
+        <div id="contatos-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Contatos</h2>
+                    <p class="text-gray-600 mt-1">Gerencie seus contatos e interações</p>
+                </div>
+                <button onclick="showContatoForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                    Novo Contato
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow" id="contatos-list">
+                <p class="text-gray-500 text-center py-8">Nenhum contato cadastrado</p>
+            </div>
+        </div>
+
+        <!-- Interações Page -->
+        <div id="interacoes-page" class="page-content hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900">Interações</h2>
+                    <p class="text-gray-600 mt-1">Histórico de todas as interações</p>
+                </div>
+                <button onclick="showInteracaoForm()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <i data-lucide="plus" class="w-5 h-5 mr-2"></i>
+                    Nova Interação
+                </button>
+            </div>
+
+            <div class="bg-white rounded-lg shadow" id="interacoes-list">
+                <p class="text-gray-500 text-center py-8">Nenhuma interação registrada</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data Manager Class
+        class DataManager {
+            constructor() {
+                this.instituicoes = JSON.parse(localStorage.getItem('instituicoes') || '[]');
+                this.contatos = JSON.parse(localStorage.getItem('contatos') || '[]');
+                this.interacoes = JSON.parse(localStorage.getItem('interacoes') || '[]');
+            }
+
+            save() {
+                localStorage.setItem('instituicoes', JSON.stringify(this.instituicoes));
+                localStorage.setItem('contatos', JSON.stringify(this.contatos));
+                localStorage.setItem('interacoes', JSON.stringify(this.interacoes));
+            }
+
+            addInstituicao(data) {
+                const inst = { id: Date.now().toString(), ...data, createdAt: new Date().toISOString() };
+                this.instituicoes.push(inst);
+                this.save();
+                return inst;
+            }
+
+            addContato(data) {
+                const contato = { id: Date.now().toString(), ...data, createdAt: new Date().toISOString() };
+                this.contatos.push(contato);
+                this.save();
+                return contato;
+            }
+
+            addInteracao(data) {
+                const interacao = { id: Date.now().toString(), ...data, createdAt: new Date().toISOString() };
+                this.interacoes.push(interacao);
+                this.save();
+                return interacao;
+            }
+
+            getInstituicaoById(id) {
+                return this.instituicoes.find(i => i.id === id);
+            }
+
+            getContatoById(id) {
+                return this.contatos.find(c => c.id === id);
+            }
+
+            getContatosByInstituicao(instituicaoId) {
+                return this.contatos.filter(c => c.instituicaoId === instituicaoId);
+            }
+
+            getInteracoesByContato(contatoId) {
+                return this.interacoes.filter(i => i.contatoId === contatoId).sort((a, b) => new Date(b.data) - new Date(a.data));
+            }
+
+            getTarefasPendentes() {
+                return this.interacoes.filter(i => i.proximoPasso && !i.proximoPassoConcluido).sort((a, b) => new Date(a.prazoFollowUp) - new Date(b.prazoFollowUp));
+            }
+        }
+
+        const db = new DataManager();
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.currentTarget.dataset.page;
+                showPage(page);
+            });
+        });
+
+        function showPage(pageName) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.add('hidden'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active', 'bg-gray-800'));
+            
+            document.getElementById(`${pageName}-page`).classList.remove('hidden');
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active', 'bg-gray-800');
+
+            if (pageName === 'dashboard') renderDashboard();
+            if (pageName === 'instituicoes') renderInstituicoes();
+            if (pageName === 'contatos') renderContatos();
+            if (pageName === 'interacoes') renderInteracoes();
+        }
+
+        // Dashboard Rendering
+        function renderDashboard() {
+            document.getElementById('total-instituicoes').textContent = db.instituicoes.length;
+            
+            const tarefas = db.getTarefasPendentes();
+            const hoje = new Date().toDateString();
+            const tarefasHoje = tarefas.filter(t => new Date(t.prazoFollowUp).toDateString() === hoje);
+            const atrasadas = tarefas.filter(t => new Date(t.prazoFollowUp) < new Date() && new Date(t.prazoFollowUp).toDateString() !== hoje);
+
+            document.getElementById('total-tarefas').textContent = tarefas.length;
+            document.getElementById('total-atrasadas').textContent = atrasadas.length;
+
+            const tarefasHojeEl = document.getElementById('tarefas-hoje');
+            if (tarefasHoje.length === 0) {
+                tarefasHojeEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma tarefa para hoje</p>';
+            } else {
+                tarefasHojeEl.innerHTML = tarefasHoje.map(t => {
+                    const contato = db.getContatoById(t.contatoId);
+                    return `
+                        <div class="border-b last:border-0 py-3">
+                            <p class="font-medium text-gray-900">${t.proximoPasso}</p>
+                            <p class="text-sm text-gray-600">${contato ? contato.nome : 'Sem contato'}</p>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            const proximasEl = document.getElementById('proximas-interacoes');
+            const proximas = tarefas.slice(0, 5);
+            if (proximas.length === 0) {
+                proximasEl.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma interação agendada</p>';
+            } else {
+                proximasEl.innerHTML = proximas.map(t => {
+                    const contato = db.getContatoById(t.contatoId);
+                    const isOverdue = new Date(t.prazoFollowUp) < new Date();
+                    return `
+                        <div class="border-b last:border-0 py-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="font-medium text-gray-900">${t.proximoPasso}</p>
+                                    <p class="text-sm text-gray-600">${contato ? contato.nome : 'Sem contato'}</p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded ${isOverdue ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}">
+                                    ${new Date(t.prazoFollowUp).toLocaleDateString('pt-BR')}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Instituições
+        function renderInstituicoes() {
+            const container = document.getElementById('instituicoes-list');
+            if (db.instituicoes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma instituição cadastrada</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AUM</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Produtos</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${db.instituicoes.map(inst => `
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4">
+                                    <div class="font-medium text-gray-900">${inst.nome}</div>
+                                    <div class="text-sm text-gray-500">${inst.cnpj || 'Sem CNPJ'}</div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-gray-600 capitalize">${inst.tipo}</td>
+                                <td class="px-6 py-4 text-sm text-gray-600">${inst.aum || '-'}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-wrap gap-1">
+                                        ${(inst.perfil?.produtos || []).slice(0, 3).map(p => 
+                                            `<span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded">${p}</span>`
+                                        ).join('')}
+                                        ${(inst.perfil?.produtos || []).length > 3 ? `<span class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">+${(inst.perfil?.produtos || []).length - 3}</span>` : ''}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <button onclick="viewInstituicao('${inst.id}')" class="text-blue-600 hover:text-blue-800">Ver</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function showInstituicaoForm() {
+            const modal = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Nova Instituição</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="instituicao-form" onsubmit="saveInstituicao(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+                                <input type="text" name="nome" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                                    <input type="text" name="cnpj" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                                    <select name="tipo" required class="w-full border rounded-lg px-4 py-2">
+                                        <option value="">Selecione...</option>
+                                        <option value="gestora">Gestora</option>
+                                        <option value="seguradora">Seguradora</option>
+                                        <option value="tesouraria">Tesouraria</option>
+                                        <option value="fo">Family Office</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">AUM Aproximado</label>
+                                <input type="text" name="aum" placeholder="Ex: R$ 500M" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Produtos Aceitos</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${['Debênture', 'CRA', 'CRI', 'Nota Comercial', 'FIDC', 'CPR', 'LF'].map(p => `
+                                        <label class="flex items-center">
+                                            <input type="checkbox" name="produtos" value="${p}" class="mr-2">
+                                            <span class="text-sm">${p}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Estratégias</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="estrategias" value="High Yield" class="mr-2">
+                                        <span class="text-sm">High Yield</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="estrategias" value="High Grade" class="mr-2">
+                                        <span class="text-sm">High Grade</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="estrategias" value="Ambos" class="mr-2">
+                                        <span class="text-sm">Ambos</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                                <textarea name="observacoes" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function saveInstituicao(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            const produtos = Array.from(form.querySelectorAll('input[name="produtos"]:checked')).map(cb => cb.value);
+            const estrategias = Array.from(form.querySelectorAll('input[name="estrategias"]:checked')).map(cb => cb.value);
+
+            const data = {
+                nome: formData.get('nome'),
+                cnpj: formData.get('cnpj'),
+                tipo: formData.get('tipo'),
+                aum: formData.get('aum'),
+                observacoes: formData.get('observacoes'),
+                perfil: { produtos, estrategias }
+            };
+
+            db.addInstituicao(data);
+            closeModal();
+            renderInstituicoes();
+        }
+
+        // Contatos
+        function renderContatos() {
+            const container = document.getElementById('contatos-list');
+            if (db.contatos.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhum contato cadastrado</p>';
+                return;
+            }
+
+            container.innerHTML = `
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cargo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Instituição</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contato</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${db.contatos.map(contato => {
+                            const inst = db.getInstituicaoById(contato.instituicaoId);
+                            return `
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-gray-900">${contato.nome}</div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${contato.cargo}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">${inst ? inst.nome : '-'}</td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-600">${contato.email}</div>
+                                        <div class="text-sm text-gray-500">${contato.telefone || '-'}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <button onclick="viewContato('${contato.id}')" class="text-blue-600 hover:text-blue-800 mr-3">Ver</button>
+                                        <button onclick="showInteracaoForm('${contato.id}')" class="text-green-600 hover:text-green-800">+ Interação</button>
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function showContatoForm() {
+            const modal = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Novo Contato</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="contato-form" onsubmit="saveContato(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo *</label>
+                                <input type="text" name="nome" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cargo *</label>
+                                    <input type="text" name="cargo" required class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Instituição *</label>
+                                    <select name="instituicaoId" required class="w-full border rounded-lg px-4 py-2">
+                                        <option value="">Selecione...</option>
+                                        ${db.instituicoes.map(inst => `<option value="${inst.id}">${inst.nome}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                                <input type="email" name="email" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                                <input type="tel" name="telefone" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                                <textarea name="observacoes" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function saveContato(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const data = {
+                nome: formData.get('nome'),
+                cargo: formData.get('cargo'),
+                email: formData.get('email'),
+                telefone: formData.get('telefone'),
+                instituicaoId: formData.get('instituicaoId'),
+                observacoes: formData.get('observacoes')
+            };
+
+            db.addContato(data);
+            closeModal();
+            renderContatos();
+        }
+
+        // Interações
+        function renderInteracoes() {
+            const container = document.getElementById('interacoes-list');
+            if (db.interacoes.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-center py-8">Nenhuma interação registrada</p>';
+                return;
+            }
+
+            const interacoes = [...db.interacoes].sort((a, b) => new Date(b.data) - new Date(a.data));
+
+            container.innerHTML = `
+                <div class="divide-y">
+                    ${interacoes.map(inter => {
+                        const contato = db.getContatoById(inter.contatoId);
+                        const inst = contato ? db.getInstituicaoById(contato.instituicaoId) : null;
+                        return `
+                            <div class="p-6">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded capitalize">${inter.tipo}</span>
+                                            <span class="text-sm text-gray-500">${new Date(inter.data).toLocaleDateString('pt-BR')}</span>
+                                        </div>
+                                        <h4 class="font-semibold text-gray-900">${inter.assunto}</h4>
+                                        <p class="text-sm text-gray-600">${contato ? contato.nome : 'Sem contato'} ${inst ? `· ${inst.nome}` : ''}</p>
+                                    </div>
+                                </div>
+                                ${inter.notas ? `<p class="text-sm text-gray-700 mb-3">${inter.notas}</p>` : ''}
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded">
+                                    <div class="flex items-start">
+                                        <i data-lucide="arrow-right" class="w-4 h-4 text-yellow-700 mr-2 mt-0.5"></i>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-yellow-900">Próximo passo:</p>
+                                            <p class="text-sm text-yellow-800">${inter.proximoPasso}</p>
+                                            ${inter.prazoFollowUp ? `<p class="text-xs text-yellow-700 mt-1">Prazo: ${new Date(inter.prazoFollowUp).toLocaleDateString('pt-BR')}</p>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function showInteracaoForm(contatoId = null) {
+            const modal = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Nova Interação</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="interacao-form" onsubmit="saveInteracao(event)">
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo *</label>
+                                    <select name="tipo" required class="w-full border rounded-lg px-4 py-2">
+                                        <option value="">Selecione...</option>
+                                        <option value="call">Call</option>
+                                        <option value="reunião">Reunião</option>
+                                        <option value="e-mail">E-mail</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Data *</label>
+                                    <input type="date" name="data" required value="${new Date().toISOString().split('T')[0]}" class="w-full border rounded-lg px-4 py-2">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contato *</label>
+                                <select name="contatoId" required class="w-full border rounded-lg px-4 py-2">
+                                    <option value="">Selecione...</option>
+                                    ${db.contatos.map(c => `<option value="${c.id}" ${contatoId === c.id ? 'selected' : ''}>${c.nome}</option>`).join('')}
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Assunto *</label>
+                                <input type="text" name="assunto" required class="w-full border rounded-lg px-4 py-2">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
+                                <textarea name="notas" rows="3" class="w-full border rounded-lg px-4 py-2"></textarea>
+                            </div>
+
+                            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                <label class="block text-sm font-medium text-yellow-900 mb-1">Próximo Passo * (obrigatório)</label>
+                                <textarea name="proximoPasso" required rows="2" class="w-full border rounded-lg px-4 py-2 mb-2"></textarea>
+                                
+                                <label class="block text-sm font-medium text-yellow-900 mb-1">Prazo para Follow-up</label>
+                                <input type="date" name="prazoFollowUp" class="w-full border rounded-lg px-4 py-2">
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end gap-3">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 border rounded-lg hover:bg-gray-50">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function saveInteracao(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const data = {
+                tipo: formData.get('tipo'),
+                data: formData.get('data'),
+                contatoId: formData.get('contatoId'),
+                assunto: formData.get('assunto'),
+                notas: formData.get('notas'),
+                proximoPasso: formData.get('proximoPasso'),
+                prazoFollowUp: formData.get('prazoFollowUp'),
+                proximoPassoConcluido: false
+            };
+
+            db.addInteracao(data);
+            closeModal();
+            renderInteracoes();
+            renderDashboard();
+        }
+
+        function viewContato(id) {
+            const contato = db.getContatoById(id);
+            const inst = db.getInstituicaoById(contato.instituicaoId);
+            const interacoes = db.getInteracoesByContato(id);
+
+            const modal = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">${contato.nome}</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <div class="mb-6 space-y-2">
+                        <p class="text-gray-700"><strong>Cargo:</strong> ${contato.cargo}</p>
+                        <p class="text-gray-700"><strong>Instituição:</strong> ${inst ? inst.nome : '-'}</p>
+                        <p class="text-gray-700"><strong>E-mail:</strong> ${contato.email}</p>
+                        <p class="text-gray-700"><strong>Telefone:</strong> ${contato.telefone || '-'}</p>
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h4 class="font-semibold text-gray-900">Timeline de Interações</h4>
+                            <button onclick="closeModal(); showInteracaoForm('${id}')" class="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+                                + Nova Interação
+                            </button>
+                        </div>
+                        
+                        ${interacoes.length === 0 ? '<p class="text-gray-500 text-center py-4">Nenhuma interação registrada</p>' : `
+                            <div class="space-y-4">
+                                ${interacoes.map(inter => `
+                                    <div class="border-l-2 border-blue-500 pl-4 py-2">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded capitalize">${inter.tipo}</span>
+                                            <span class="text-sm text-gray-500">${new Date(inter.data).toLocaleDateString('pt-BR')}</span>
+                                        </div>
+                                        <h5 class="font-medium text-gray-900">${inter.assunto}</h5>
+                                        ${inter.notas ? `<p class="text-sm text-gray-600 mt-1">${inter.notas}</p>` : ''}
+                                        <div class="mt-2 text-sm bg-yellow-50 p-2 rounded">
+                                            <strong>Próximo:</strong> ${inter.proximoPasso}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function viewInstituicao(id) {
+            const inst = db.getInstituicaoById(id);
+            const contatos = db.getContatosByInstituicao(id);
+
+            const modal = document.getElementById('modal-container');
+            const content = document.getElementById('modal-content');
+            
+            content.innerHTML = `
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">${inst.nome}</h3>
+                        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <p class="text-sm text-gray-500">CNPJ</p>
+                            <p class="font-medium">${inst.cnpj || '-'}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Tipo</p>
+                            <p class="font-medium capitalize">${inst.tipo}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">AUM</p>
+                            <p class="font-medium">${inst.aum || '-'}</p>
+                        </div>
+                    </div>
+
+                    ${inst.perfil ? `
+                        <div class="mb-6">
+                            <h4 class="font-semibold text-gray-900 mb-3">Perfil de Investimento</h4>
+                            <div class="space-y-3">
+                                ${inst.perfil.produtos?.length ? `
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">Produtos</p>
+                                        <div class="flex flex-wrap gap-2">
+                                            ${inst.perfil.produtos.map(p => `<span class="text-sm px-2 py-1 bg-blue-100 text-blue-700 rounded">${p}</span>`).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${inst.perfil.estrategias?.length ? `
+                                    <div>
+                                        <p class="text-sm text-gray-500 mb-1">Estratégias</p>
+                                        <div class="flex flex-wrap gap-2">
+                                            ${inst.perfil.estrategias.map(e => `<span class="text-sm px-2 py-1 bg-green-100 text-green-700 rounded">${e}</span>`).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="border-t pt-6">
+                        <h4 class="font-semibold text-gray-900 mb-4">Contatos (${contatos.length})</h4>
+                        ${contatos.length === 0 ? '<p class="text-gray-500 text-center py-4">Nenhum contato cadastrado</p>' : `
+                            <div class="space-y-3">
+                                ${contatos.map(c => `
+                                    <div class="border rounded-lg p-3 hover:bg-gray-50">
+                                        <p class="font-medium text-gray-900">${c.nome}</p>
+                                        <p class="text-sm text-gray-600">${c.cargo}</p>
+                                        <p class="text-sm text-gray-500">${c.email}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('modal-container').classList.add('hidden');
+        }
+
+        function applyFilters() {
+            // Placeholder para implementação de filtros
+            renderInstituicoes();
+        }
+
+        // Initialize
+        renderDashboard();
+        lucide.createIcons();
+    </script>
+</body>
+</html>
